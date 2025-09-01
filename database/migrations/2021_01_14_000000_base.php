@@ -48,7 +48,7 @@ return new class() extends MigrationAbstract {
 
             $table->jsonb('config')->nullable();
 
-            $table->geometry('point', 'point', 4326)->invisible();
+            $table->geometry('point', 'point', 4326);
 
             $table->boolean('dashboard')->default(0);
             $table->boolean('telegram')->default(0);
@@ -83,7 +83,7 @@ return new class() extends MigrationAbstract {
             $table->string('name')->index();
             $table->jsonb('alias')->nullable();
 
-            $table->geometry('point', 'point', 4326)->invisible();
+            $table->geometry('point', 'point', 4326);
 
             $this->timestamps($table);
 
@@ -239,7 +239,7 @@ return new class() extends MigrationAbstract {
         Schema::create('position', function (Blueprint $table) {
             $table->id();
 
-            $table->geometry('point', 'point', 4326)->invisible();
+            $table->geometry('point', 'point', 4326);
 
             $table->decimal('speed', 6, 2);
 
@@ -283,7 +283,7 @@ return new class() extends MigrationAbstract {
             $table->decimal('price', 7, 3);
             $table->decimal('total', 6, 2);
 
-            $table->geometry('point', 'point', 4326)->invisible();
+            $table->geometry('point', 'point', 4326);
 
             $table->dateTime('date_at');
 
@@ -322,7 +322,7 @@ return new class() extends MigrationAbstract {
             $table->id();
 
             $table->string('zone')->index();
-            $table->geometry('geojson', 'multipolygon')->invisible();
+            $table->geometry('geojson', 'multipolygon');
 
             $table->boolean('default')->default(0);
 
