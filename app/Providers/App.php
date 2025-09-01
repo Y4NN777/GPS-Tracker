@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Throwable;
 use App\Domains\Core\Traits\Factory;
 
 class App extends ServiceProvider
@@ -14,8 +15,20 @@ class App extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->configuration();
-        $this->language();
+        // Make application boot resilient when DB driver/connection is unavailable
+        try {
+            $this->configuration();
+        } catch (Throwable $e) {
+            logger()->error($e);
+            logger()->warning('App configuration binding skipped due to database error. Hint: install php8.2-mysql and ensure MySQL is running.');
+        }
+
+        try {
+            $this->language();
+        } catch (Throwable $e) {
+            logger()->error($e);
+            logger()->warning('Language initialization skipped due to database error.');
+        }
     }
 
     /**
