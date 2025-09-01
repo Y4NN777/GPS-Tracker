@@ -39,8 +39,12 @@ class Server extends ServerAbstract
      */
     public function socketType(string $type): self
     {
+        if (extension_loaded('sockets') === false) {
+            throw new Exception('PHP sockets extension is not installed/enabled. Install php8.2-sockets and restart PHP.');
+        }
+
         $this->socketType = match ($type) {
-            'stream' => SOCK_STREAM,
+            'stream' => \SOCK_STREAM,
             default => throw new Exception(sprintf('Invalid Socket Type %s', $type)),
         };
 
@@ -94,7 +98,7 @@ class Server extends ServerAbstract
      */
     protected function create(): void
     {
-        $this->socket = socket_create(AF_INET, $this->socketType, $this->socketProtocol);
+        $this->socket = \socket_create(\AF_INET, $this->socketType, $this->socketProtocol);
     }
 
     /**
@@ -102,7 +106,7 @@ class Server extends ServerAbstract
      */
     protected function option(): void
     {
-        socket_set_option($this->socket, SOL_SOCKET, SO_REUSEADDR, 1);
+        socket_set_option($this->socket, \SOL_SOCKET, \SO_REUSEADDR, 1);
     }
 
     /**
@@ -198,8 +202,8 @@ class Server extends ServerAbstract
 
         $timeout = ['sec' => 5, 'usec' => 0];
 
-        socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, $timeout);
-        socket_set_option($socket, SOL_SOCKET, SO_SNDTIMEO, $timeout);
+        socket_set_option($socket, \SOL_SOCKET, \SO_RCVTIMEO, $timeout);
+        socket_set_option($socket, \SOL_SOCKET, \SO_SNDTIMEO, $timeout);
 
         $this->pool->add($connection = new Connection($this->port, $socket));
 
@@ -279,8 +283,8 @@ class Server extends ServerAbstract
             return;
         }
 
-        pcntl_signal(SIGINT, [$this, 'gracefulShutdownHandler']);
-        pcntl_signal(SIGTERM, [$this, 'gracefulShutdownHandler']);
+        pcntl_signal(\SIGINT, [$this, 'gracefulShutdownHandler']);
+        pcntl_signal(\SIGTERM, [$this, 'gracefulShutdownHandler']);
     }
 
     /**
