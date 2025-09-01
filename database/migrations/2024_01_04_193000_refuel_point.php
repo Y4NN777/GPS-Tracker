@@ -39,10 +39,17 @@ return new class() extends MigrationAbstract {
             $table->unsignedBigInteger('state_id')->nullable();
         });
 
+        Schema::table('refuel', function (Blueprint $table) {
+            $table->double('latitude')->nullable();
+            $table->double('longitude')->nullable();
+        });
+
+        // Populate latitude and longitude from point data
         $this->db()->unprepared('
-            ALTER TABLE `refuel`
-            ADD COLUMN `latitude` DOUBLE AS (ROUND(ST_LATITUDE(`point`), 5)) STORED,
-            ADD COLUMN `longitude` DOUBLE AS (ROUND(ST_LONGITUDE(`point`), 5)) STORED;
+            UPDATE `refuel`
+            SET `latitude` = ROUND(ST_LATITUDE(`point`), 5),
+                `longitude` = ROUND(ST_LONGITUDE(`point`), 5)
+            WHERE `point` IS NOT NULL;
         ');
 
         $this->db()->unprepared('

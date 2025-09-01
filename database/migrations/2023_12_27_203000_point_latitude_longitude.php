@@ -31,22 +31,41 @@ return new class() extends MigrationAbstract {
      */
     protected function tables(): void
     {
+        Schema::table('alarm_notification', function (Blueprint $table) {
+            $table->double('latitude')->nullable();
+            $table->double('longitude')->nullable();
+        });
+
+        Schema::table('city', function (Blueprint $table) {
+            $table->double('latitude')->nullable();
+            $table->double('longitude')->nullable();
+        });
+
+        Schema::table('position', function (Blueprint $table) {
+            $table->double('latitude')->nullable();
+            $table->double('longitude')->nullable();
+        });
+
+        // Populate latitude and longitude from existing point data
         $this->db()->unprepared('
-            ALTER TABLE `alarm_notification`
-            ADD COLUMN `latitude` DOUBLE AS (ROUND(ST_LATITUDE(`point`), 5)) STORED,
-            ADD COLUMN `longitude` DOUBLE AS (ROUND(ST_LONGITUDE(`point`), 5)) STORED;
+            UPDATE `alarm_notification`
+            SET `latitude` = ROUND(ST_LATITUDE(`point`), 5),
+                `longitude` = ROUND(ST_LONGITUDE(`point`), 5)
+            WHERE `point` IS NOT NULL;
         ');
 
         $this->db()->unprepared('
-            ALTER TABLE `city`
-            ADD COLUMN `latitude` DOUBLE AS (ROUND(ST_LATITUDE(`point`), 5)) STORED,
-            ADD COLUMN `longitude` DOUBLE AS (ROUND(ST_LONGITUDE(`point`), 5)) STORED;
+            UPDATE `city`
+            SET `latitude` = ROUND(ST_LATITUDE(`point`), 5),
+                `longitude` = ROUND(ST_LONGITUDE(`point`), 5)
+            WHERE `point` IS NOT NULL;
         ');
 
         $this->db()->unprepared('
-            ALTER TABLE `position`
-            ADD COLUMN `latitude` DOUBLE AS (ROUND(ST_LATITUDE(`point`), 5)) STORED,
-            ADD COLUMN `longitude` DOUBLE AS (ROUND(ST_LONGITUDE(`point`), 5)) STORED;
+            UPDATE `position`
+            SET `latitude` = ROUND(ST_LATITUDE(`point`), 5),
+                `longitude` = ROUND(ST_LONGITUDE(`point`), 5)
+            WHERE `point` IS NOT NULL;
         ');
     }
 
