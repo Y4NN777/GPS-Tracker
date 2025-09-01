@@ -141,6 +141,11 @@ class Server extends ServerAbstract
     protected function read(Closure $handler): void
     {
         do {
+            // Allow pending signals (SIGINT/SIGTERM) to be dispatched promptly
+            if (function_exists('pcntl_signal_dispatch')) {
+                pcntl_signal_dispatch();
+            }
+
             usleep(10000);
 
             $sockets = $this->pool->sockets();
@@ -176,7 +181,31 @@ class Server extends ServerAbstract
 
         array_push($sockets, $this->socket);
 
-        return intval(socket_select($sockets, $write, $except, null));
+        // Use a finite timeout so signals can be delivered and processed regularly
+        $seconds = 1;
+        $microseconds = 0;
+
+        // socket_select can be interrupted by signals (EINTR). Handle gracefully and continue.
+        $result = @socket_select($sockets, $write, $except, $seconds, $microseconds);
+
+        if ($result === false) {
+            $err = socket_last_error();
+
+            if (function_exists('socket_strerror') && ($err === \SOCKET_EINTR || $err === 4)) {
+                // Interrupted system call: clear and continue as no ready sockets
+                socket_clear_error();
+                return 0;
+            }
+
+            $message = 'socket_select failed';
+            if (function_exists('socket_strerror')) {
+                $message .= ': '.socket_strerror($err);
+            }
+
+            throw new \RuntimeException($message, (int)$err);
+        }
+
+        return (int)$result;
     }
 
     /**
@@ -281,6 +310,10 @@ class Server extends ServerAbstract
     {
         if (function_exists('pcntl_signal') === false) {
             return;
+        }
+
+        if (function_exists('pcntl_async_signals')) {
+            pcntl_async_signals(true);
         }
 
         pcntl_signal(\SIGINT, [$this, 'gracefulShutdownHandler']);
