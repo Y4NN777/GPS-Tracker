@@ -50,7 +50,8 @@
             "Database\\": "database/"
         },
         "files": [
-            "app/Services/Helper/functions.php"
+            "app/Services/Helper/functions.php",
+            "bootstrap/mb_split_polyfill.php"
         ]
     },
     "autoload-dev": {
