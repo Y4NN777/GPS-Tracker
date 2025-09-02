@@ -156,6 +156,16 @@ class Device extends ModelAbstract
      */
     public function config(string $key): int
     {
-        return intval($this->config[$key] ?? 0) ?: app('configuration')->int($key);
+        $value = intval($this->config[$key] ?? 0);
+
+        if ($value) {
+            return $value;
+        }
+
+        if (app()->bound('configuration')) {
+            return app('configuration')->int($key);
+        }
+
+        return 0;
     }
 }
