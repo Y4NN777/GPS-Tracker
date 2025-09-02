@@ -59,6 +59,10 @@ class Set extends ActionAbstract
      */
     protected function available(): bool
     {
+        if (app()->bound('configuration') === false) {
+            return false;
+        }
+
         return app('configuration')->available();
     }
 
