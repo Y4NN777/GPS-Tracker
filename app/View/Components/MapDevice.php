@@ -124,6 +124,8 @@ class MapDevice extends Component
      */
     protected function filterFinishedMinutes(): string
     {
-        return app('configuration')->string('trip_wait_minutes');
+        return app()->bound('configuration')
+            ? app('configuration')->string('trip_wait_minutes')
+            : '0';
     }
 }
