@@ -44,7 +44,13 @@ class AppBind extends ActionAbstract
      */
     protected function listAvailable(): bool
     {
-        return Model::schema()->hasTable(Model::TABLE);
+        try {
+            return Model::schema()->hasTable(Model::TABLE);
+        } catch (\Throwable $e) {
+            logger()->warning('Configuration table check failed: '.$e->getMessage());
+
+            return false;
+        }
     }
 
     /**
